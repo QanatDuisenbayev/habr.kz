@@ -1,0 +1,42 @@
+{% extends 'index.html' %}
+{% block menu %}
+<li><a href="{% url 'base_view' %}">Мақалалар</a></li>
+<li><a href="#">Пайдаланушылар</a></li>
+<li><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded = "false">Хабтар <span class="caret"></span></a>
+<ul class="dropdown-menu"> {% for category in categories %}
+<li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+{% endfor %}</ul></li>
+ {% if not request.user.is_authenticated %}
+    <li><a href="{% url 'login_view' %}">Кіру</a></li>
+    <li><a href="{% url 'registration' %}">Тіркелу</a></li>
+ {% else %}
+{% endif %}
+{% if request.user.is_authenticated %}
+<ul class="nav navbar-nav navbar-right">
+<li class='active'><a href="{% url 'account_view' request.user %}">Жeке парақшам</a></li>
+<li><a href="{% url 'logout_view' %}">Шығу</a></li>
+</ul>
+{% endif %}
+{% endblock menu %}
+
+{% load crispy_forms_tags %}
+{% block content %}
+<br><br><br>
+<div class="container">
+	<form action="{% url 'new_post' %}" method="post">
+		{{ form.error }}
+		{% csrf_token %}
+		{{ form|crispy }}
+		<button style="font-size:20px" id="article" class='btn btn-primary' type='submit'>Жіберу</button>	
+	</form>
+</div>
+{% endblock content %}
+{% block jquery %}
+<script type="text/javascript">
+		$(document).ready(function(){
+		$('#article').on('click',function(e){
+			alert('Жіберілді, тексерістен өткенсін сайтқа шығады.');
+		})
+	})
+</script>
+{% endblock jquery %}

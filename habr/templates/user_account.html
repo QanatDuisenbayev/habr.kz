@@ -1,0 +1,64 @@
+{% extends 'index.html' %}
+{% block menu %}
+<li><a href="{% url 'base_view' %}">Мақалалар</a></li>
+<li><a href="#">Пайдаланушылар</a></li>
+<li><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded = "false">Хабтар <span class="caret"></span></a>
+<ul class="dropdown-menu"> {% for category in categories %}
+<li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+{% endfor %}</ul></li>
+ {% if not request.user.is_authenticated %}
+    <li><a href="{% url 'login_view' %}">Кіру</a></li>
+    <li><a href="{% url 'registration' %}">Тіркелу</a></li>
+ {% else %}
+{% endif %}
+{% if request.user.is_authenticated %}
+<ul class="nav navbar-nav navbar-right">
+<li class='active'><a href="{% url 'account_view' request.user %}">Жeке парақшам</a></li>
+<li><a href="{% url 'logout_view' %}">Шығу</a></li>
+</ul>
+{% endif %}
+{% endblock menu %}
+
+{% block content %}
+<div class="container">
+<hr>
+	<div class="row">
+	<div class="col-sm-10 col-sm-offset-1">
+	<div class="col-sm-4">
+		<h2>Жеке ақпарат</h2>
+		<h3>Аты: {{ user }}</h3>
+		<h3>Тегі: {{ user.last_name }}</h3>
+		<h3>email: {{ user.email }}</h3>
+	</div>
+	</div>
+	</div>
+	<br><br>
+	<hr>
+	<div class="row">
+	<div class="col-sm-10 col-sm-offset-1">
+		<h2>Таңдаулылар мақалалар:</h2>
+		<ul class="button-group">
+			{% for article in current_user.favorite_articles.all %}
+			<li class="list-group-item"><a href="{{ article.get_absolute_url }}" style="font-size:20px;color:black;text-decoration:none">{{ article.title }} </a> </li>
+			{% endfor %}
+		</ul>
+	</div>
+	</div>
+	<br><br><hr>	
+	<div class="row">
+	<div class="col-sm-10 col-sm-offset-1">
+		<h2 style="margin-bottom: 60px">Менің мақалаларым:</h2>	
+  		<ul class="button-group">
+			{% for article in current_user.my_article.all %}
+			<li class="list-group-item"><a href="{{ article.get_absolute_url }}" style="font-size:20px;color:black;text-decoration:none">{{ article.title }} </a> </li>
+			{% endfor %}
+		</ul>
+		<br><br>
+		<a href="{% url 'new_post' %}"><button style="font-size:20px" class='btn btn-primary'>Жаңа мақала жазу</button></a>
+	</div>
+	</div>
+	<br><br>
+	<hr>
+</div>
+<br><br><br><br>
+{% endblock content %}

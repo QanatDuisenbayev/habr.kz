@@ -1,0 +1,152 @@
+{% extends 'index.html' %}
+{% load crispy_forms_tags %}
+{% block menu %}
+<li><a href="{% url 'base_view' %}">Мақалалар</a></li>
+<li><a href="#">Пайдаланушылар</a></li>
+<li class = 'active'><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded = "false">Хабтар <span class="caret"></span></a>
+<ul class="dropdown-menu"> {% for category in categories %}
+<li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+{% endfor %}</ul></li>
+ {% if not request.user.is_authenticated %}
+    <li><a href="{% url 'login_view' %}">Кіру</a></li>
+    <li><a href="{% url 'registration' %}">Тіркелу</a></li>
+ {% else %}
+{% endif %}
+{% if request.user.is_authenticated %}
+<ul class="nav navbar-nav navbar-right">
+<li><a href="{% url 'account_view' request.user %}">Жeке парақшам</a></li>
+<li><a href="{% url 'logout_view' %}">Шығу</a></li>
+</ul>
+{% endif %}
+{% endblock menu %}
+
+{% block content %}
+<div class='container'>
+	<div class='col-sm-12'>
+		<h1 class="text-center">{{ article.title }}</h1>
+		<br>
+	<p class="text-center"><img src = '{% if article.image %} {{ article.image.url }} {% endif %}' width="80%"></p>
+	<div class="col-sm-12">
+	<p style="color:black;font-size: 20px;font-family: Geneva, Arial, Helvetica, sans-serif;"> {{ article.content|safe  }} </p>
+	<hr>
+	<p style="color:red">Егер мақала ұнаса "ұнады"-ны басыңыз және басқаннан кейін қайтадан алынбайды.</p>
+	<a href="#" id="like"><span class="glyphicon glyphicon-thumbs-up" style="color:green"></span></a> <span id="liked">{{ article.likes }}</span>
+	<hr>
+	<p class="add_to_fovorites-{{ article.slug }}">
+		{% if article in current_user.favorite_articles.all %}
+		<button class="btn btn-default disabled">Таңдаулыда қосылулы</button>		
+		{% else %}
+		<a href="#" class="article" data-slug='{{ article.slug }}'><button class="btn btn-danger">Таңдаулыға қосу</button></a>
+		{% endif %}
+	</p>
+	<p class="article_added-{{ article.slug }}"></p>
+	<h2>Коментарии:</h2>
+	{% for comment in article_comments %}
+	<small>{{ comment.author.username }}</small>
+	<p>{{ comment.comment }}</p>
+	<small>{{ comment.timestamp }}</small>
+	<br>
+	{% endfor %}
+	</div>
+	<div class="col-sm-7 col-sm-offset-2">
+		<form action="" method="POST">
+			<input type="hidden" id="article" data-id='{{ article.id }}'>
+			{% csrf_token %}
+			{{ form|crispy }}
+			<input type="submit" value="Комменатрии қосу" id='add_comment'>
+		</form>
+		<br><br><br>
+	</div>
+	</div>
+</div>
+{% endblock content	%}
+{% block jquery %}
+<script type="text/javascript">
+			$(document).ready(function(){
+				function getCookie(name) {
+		    var cookieValue = null;
+		    if (document.cookie && document.cookie !== '') {
+		        var cookies = document.cookie.split(';');
+		        for (var i = 0; i < cookies.length; i++) {
+		            var cookie = jQuery.trim(cookies[i]);
+		            // Does this cookie string begin with the name we want?
+		            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		                break;
+		            }
+		        }
+		    }
+		    return cookieValue;
+		}
+		var csrftoken = getCookie('csrftoken');
+		
+		$('#add_comment').on('click', function(e){
+		e.preventDefault()
+		var article_id = $("#article").attr('data-id')
+		var comment = $("#id_comment").val()
+
+		data = {
+			article_id: article_id,
+			comment: comment,
+			csrfmiddlewaretoken: csrftoken
+		}
+		$.ajax({
+			type: "POST",
+			url: "{% url 'add_comment' %}",
+			dataType: 'json',
+			data: data,
+			succsss: function(data){
+				console.log(data)
+			}		
+		})		
+	})
+  })
+</script>
+<script type="text/javascript">
+	$(document).ready(function(){
+
+		$('#like').on('click',function(e){
+		e.preventDefault()
+		var like = 'like'
+		var article_id = $('#article').attr('data-id')
+		data = {
+			article_id: article_id,
+			like: like
+		}
+		$.ajax({
+			type: "GET",
+			url: "{% url 'user_reaction' %}",
+			dataType : 'json',
+			data: data,
+			success: function(data){
+				$('#liked').html(data.likes)
+			}
+		})
+	})
+})
+</script>
+
+<script>
+	$(document).ready(function(){
+		$('.article').on('click',function(e){
+			e.preventDefault()
+			var article_slug = $(this).attr('data-slug')
+
+			data = {
+				article_slug: article_slug
+			}
+			$.ajax({
+				type: "GET",
+				url: "{% url 'add_to_favorites' %}",
+				dataType: "json",
+				data:data,
+				success: function(data){
+					$('.add_to_fovorites-'+article_slug).css('display','none')
+					$('.article_added-'+article_slug).html('<button class="btn btn-default disabled">Таңдаулыда қосылулы</button>')
+				}
+			})
+		})
+	})
+</script>
+
+{% endblock jquery %}

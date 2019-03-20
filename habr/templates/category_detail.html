@@ -1,0 +1,49 @@
+{% extends 'index.html' %}
+
+{% block menu %}
+<li><a href="{% url 'base_view' %}">Мақалалар</a></li>
+<li><a href="#">Пайдаланушылар</a></li>
+<li class = 'active'><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded = "false">Хабтар <span class="caret"></span></a>
+<ul class="dropdown-menu"> {% for category in categories %}
+<li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+{% endfor %}</ul></li>
+ {% if not request.user.is_authenticated %}
+    <li><a href="{% url 'login_view' %}">Кіру</a></li>
+    <li><a href="{% url 'registration' %}">Тіркелу</a></li>
+ {% else %}
+{% endif %}
+{% if request.user.is_authenticated %}
+<ul class="nav navbar-nav navbar-right">
+<li><a href="{% url 'account_view' request.user %}">Жeке парақшам</a></li>
+<li><a href="{% url 'logout_view' %}">Шығу</a></li>
+</ul>
+{% endif %}
+{% endblock menu %}
+
+
+
+{% block content %}
+<div class="container">
+<h2>Мақалалар : {{ category.name }}</h2>
+<hr>
+<div class="row">
+	{%for article in articles_from_category %}
+	{% if article.likes > 0 %}
+<div class="col-sm-10" style="margin-bottom: 40px">
+	<div class="col-sm-4">
+		<img src="{% if article.image %}{{ article.image.url }} {% endif %}" class="img-responsive">
+	</div>
+	<div class="col-sm-8">
+	<div class="text-center">
+	<h2>{{ article.title }}</h2>
+	<p style="color:black;font-size: 20px;font-family: Geneva, Arial, Helvetica, sans-serif;"> {{ article.content|truncatewords:30 }} </p>
+	<a href="{{ article.get_absolute_url }}"><button class="btn btn-primary" style="font-size: 20px" >Толық оқу</button></a>
+	</div>
+	</div>
+</div>
+	{% endif %}
+	{% endfor %}
+</div>
+</div>
+<br><br>
+{% endblock content %}

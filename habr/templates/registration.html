@@ -1,0 +1,33 @@
+{% extends 'index.html' %}
+{% load crispy_forms_tags %}
+{% block menu %}
+<li><a href="{% url 'base_view' %}">Мақалалар</a></li>
+<li><a href="#">Пайдаланушылар</a></li>
+<li><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded = "false">Хабтар <span class="caret"></span></a>
+<ul class="dropdown-menu"> {% for category in categories %}
+<li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+{% endfor %}</ul></li>         
+<li><a href="{% url 'login_view' %}">Кіру</a></li>
+<li class="active"><a href="{% url 'registration' %}">Тіркелу</a></li>
+{% if request.user.is_authenticated %}
+<ul class="nav navbar-nav navbar-right">
+<li><a href="#">Жeке парақшам</a></li>
+</ul>
+{% endif %}
+{% endblock menu %}
+{% block content %}
+<div class="container">
+	<h3 class="text-center">Жаңа пайдаланушыны тіркеу</h3>
+	<hr>
+	<div class="row">
+		<div class="col-sm-6 col-sm-offset-3">
+			<form action="" method="POST">
+				{{ form.error }}
+				{% csrf_token %}
+				{{ form|crispy }}
+				<input style="font-size:20px" class='btn btn-primary' type="submit" value="Тіркелу">
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock content %}
